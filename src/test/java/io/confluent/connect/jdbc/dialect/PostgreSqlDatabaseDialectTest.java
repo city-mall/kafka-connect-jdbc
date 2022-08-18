@@ -238,7 +238,7 @@ public class PostgreSqlDatabaseDialectTest extends BaseDialectTest<PostgreSqlDat
     TableDefinition tableDefn = builder.build();
     assertEquals(
         "INSERT INTO \"myTable\" (\"id1\",\"id2\",\"columnA\",\"columnB\"," +
-        "\"columnC\",\"columnD\") VALUES (?,?,?,?,?,?)",
+        "\"columnC\",\"columnD\") VALUES (?::int,?::int,?::varchar,?::varchar,?::varchar,?::varchar)",
         dialect.buildInsertStatement(tableId, pkColumns, columnsAtoD, tableDefn)
     );
 
@@ -247,7 +247,7 @@ public class PostgreSqlDatabaseDialectTest extends BaseDialectTest<PostgreSqlDat
 
     assertEquals(
         "INSERT INTO myTable (id1,id2,columnA,columnB," +
-        "columnC,columnD) VALUES (?,?,?,?,?,?)",
+        "columnC,columnD) VALUES (?::int,?::int,?::varchar,?::varchar,?::varchar,?::varchar)",
         dialect.buildInsertStatement(tableId, pkColumns, columnsAtoD, tableDefn)
     );
 
@@ -265,7 +265,7 @@ public class PostgreSqlDatabaseDialectTest extends BaseDialectTest<PostgreSqlDat
     assertEquals(
         "INSERT INTO myTable (" +
         "id1,id2,columnA,uuidColumn,dateColumn" +
-        ") VALUES (?,?,?,?::uuid,?)",
+        ") VALUES (?::int,?::int,?::varchar,?::uuid,?::date)",
         dialect.buildInsertStatement(tableId, pkColumns, nonPkColumns, tableDefn)
     );
   }
@@ -281,7 +281,7 @@ public class PostgreSqlDatabaseDialectTest extends BaseDialectTest<PostgreSqlDat
     TableDefinition tableDefn = builder.build();
     assertEquals(
         "INSERT INTO \"myTable\" (\"id1\",\"id2\",\"columnA\",\"columnB\"," +
-        "\"columnC\",\"columnD\") VALUES (?,?,?,?,?,?) ON CONFLICT (\"id1\"," +
+        "\"columnC\",\"columnD\") VALUES (?::int,?::int,?::varchar,?::varchar,?::varchar,?::varchar) ON CONFLICT (\"id1\"," +
         "\"id2\") DO UPDATE SET \"columnA\"=EXCLUDED" +
         ".\"columnA\",\"columnB\"=EXCLUDED.\"columnB\",\"columnC\"=EXCLUDED" +
         ".\"columnC\",\"columnD\"=EXCLUDED.\"columnD\"",
@@ -293,7 +293,7 @@ public class PostgreSqlDatabaseDialectTest extends BaseDialectTest<PostgreSqlDat
 
     assertEquals(
         "INSERT INTO myTable (id1,id2,columnA,columnB," +
-        "columnC,columnD) VALUES (?,?,?,?,?,?) ON CONFLICT (id1," +
+        "columnC,columnD) VALUES (?::int,?::int,?::varchar,?::varchar,?::varchar,?::varchar) ON CONFLICT (id1," +
         "id2) DO UPDATE SET columnA=EXCLUDED" +
         ".columnA,columnB=EXCLUDED.columnB,columnC=EXCLUDED" +
         ".columnC,columnD=EXCLUDED.columnD",
@@ -314,7 +314,7 @@ public class PostgreSqlDatabaseDialectTest extends BaseDialectTest<PostgreSqlDat
     assertEquals(
         "INSERT INTO myTable (" +
         "id1,id2,columnA,uuidColumn,dateColumn" +
-        ") VALUES (?,?,?,?::uuid,?) ON CONFLICT (id1," +
+        ") VALUES (?::int,?::int,?::varchar,?::uuid,?::date) ON CONFLICT (id1," +
         "id2) DO UPDATE SET " +
         "columnA=EXCLUDED.columnA," +
         "uuidColumn=EXCLUDED.uuidColumn," +
@@ -334,11 +334,11 @@ public class PostgreSqlDatabaseDialectTest extends BaseDialectTest<PostgreSqlDat
     TableDefinition tableDefn = builder.build();
     ColumnId uuidColumn = tableDefn.definitionForColumn("uuidColumn").id();
     ColumnId dateColumn = tableDefn.definitionForColumn("dateColumn").id();
-    assertEquals("", dialect.valueTypeCast(tableDefn, columnPK1));
-    assertEquals("", dialect.valueTypeCast(tableDefn, columnPK2));
-    assertEquals("", dialect.valueTypeCast(tableDefn, columnA));
+    assertEquals("::int", dialect.valueTypeCast(tableDefn, columnPK1));
+    assertEquals("::int", dialect.valueTypeCast(tableDefn, columnPK2));
+    assertEquals("::varchar", dialect.valueTypeCast(tableDefn, columnA));
     assertEquals("::uuid", dialect.valueTypeCast(tableDefn, uuidColumn));
-    assertEquals("", dialect.valueTypeCast(tableDefn, dateColumn));
+    assertEquals("::date", dialect.valueTypeCast(tableDefn, dateColumn));
   }
 
   @Test
@@ -393,7 +393,7 @@ public class PostgreSqlDatabaseDialectTest extends BaseDialectTest<PostgreSqlDat
     TableId customer = tableDefn.id();
     assertEquals(
         "INSERT INTO \"Customer\" (\"id\",\"name\",\"salary\",\"address\") " +
-         "VALUES (?,?,?,?) ON CONFLICT (\"id\") DO UPDATE SET \"name\"=EXCLUDED.\"name\"," +
+         "VALUES (?::int,?::varchar,?::real,?::varchar) ON CONFLICT (\"id\") DO UPDATE SET \"name\"=EXCLUDED.\"name\"," +
          "\"salary\"=EXCLUDED.\"salary\",\"address\"=EXCLUDED.\"address\"",
         dialect.buildUpsertQueryStatement(
             customer,
@@ -405,7 +405,7 @@ public class PostgreSqlDatabaseDialectTest extends BaseDialectTest<PostgreSqlDat
 
     assertEquals(
             "INSERT INTO \"Customer\" (\"id\",\"name\",\"salary\",\"address\") " +
-                    "VALUES (?,?,?,?) ON CONFLICT (\"id\",\"name\",\"salary\",\"address\") DO NOTHING",
+                    "VALUES (?::int,?::varchar,?::real,?::varchar) ON CONFLICT (\"id\",\"name\",\"salary\",\"address\") DO NOTHING",
             dialect.buildUpsertQueryStatement(
                     customer,
                     columns(customer, "id", "name", "salary", "address"),
@@ -419,7 +419,7 @@ public class PostgreSqlDatabaseDialectTest extends BaseDialectTest<PostgreSqlDat
 
     assertEquals(
         "INSERT INTO Customer (id,name,salary,address) " +
-        "VALUES (?,?,?,?) ON CONFLICT (id) DO UPDATE SET name=EXCLUDED.name," +
+        "VALUES (?::int,?::varchar,?::real,?::varchar) ON CONFLICT (id) DO UPDATE SET name=EXCLUDED.name," +
         "salary=EXCLUDED.salary,address=EXCLUDED.address",
         dialect.buildUpsertQueryStatement(
             customer,
@@ -431,7 +431,7 @@ public class PostgreSqlDatabaseDialectTest extends BaseDialectTest<PostgreSqlDat
 
     assertEquals(
             "INSERT INTO Customer (id,name,salary,address) " +
-                    "VALUES (?,?,?,?) ON CONFLICT (id,name,salary,address) DO NOTHING",
+                    "VALUES (?::int,?::varchar,?::real,?::varchar) ON CONFLICT (id,name,salary,address) DO NOTHING",
             dialect.buildUpsertQueryStatement(
                     customer,
                     columns(customer, "id", "name", "salary", "address"),

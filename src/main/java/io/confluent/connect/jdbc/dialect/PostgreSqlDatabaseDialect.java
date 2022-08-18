@@ -83,6 +83,9 @@ public class PostgreSqlDatabaseDialect extends GenericDatabaseDialect {
   static final String JSON_TYPE_NAME = "json";
   static final String JSONB_TYPE_NAME = "jsonb";
   static final String UUID_TYPE_NAME = "uuid";
+  static final String TIMESTAMP_TYPE_NAME = "timestamp";
+  static final String TIMESTAMP_WITH_TIME_ZONE_TYPE_NAME = "timestamp with time zone";
+  static final String TIMESTAMP_WITH_TIME_ZONE_TYPE_NAME_ARRAY = "timestamp with time zone[]";
   static final String PRECISION_PARAMETER_KEY = "connect.decimal.precision";
 
   /**
@@ -92,7 +95,10 @@ public class PostgreSqlDatabaseDialect extends GenericDatabaseDialect {
       Utils.mkSet(
           JSON_TYPE_NAME,
           JSONB_TYPE_NAME,
-          UUID_TYPE_NAME
+          UUID_TYPE_NAME,
+          TIMESTAMP_TYPE_NAME,
+          TIMESTAMP_WITH_TIME_ZONE_TYPE_NAME,
+          TIMESTAMP_WITH_TIME_ZONE_TYPE_NAME_ARRAY
       )
   );
 
@@ -584,9 +590,10 @@ public class PostgreSqlDatabaseDialect extends GenericDatabaseDialect {
         String typeName = defn.typeName(); // database-specific
         if (typeName != null) {
           typeName = typeName.toLowerCase();
-          if (CAST_TYPES.contains(typeName)) {
-            return "::" + typeName;
-          }
+          return "::" + typeName;
+          // if (CAST_TYPES.contains(typeName)) {
+          //   return "::" + typeName;
+          // }
         }
       }
     }
